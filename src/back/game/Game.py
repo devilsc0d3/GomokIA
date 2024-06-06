@@ -3,9 +3,7 @@ import numpy as np
 
 class Game:
     def __init__(self):
-        array = np.arange(19 * 19)
-        game_content = np.zeros_like(array).reshape(19, 19)
-        self.__game = game_content
+        self.__game = np.zeros((15, 15))  # init the matrix
         self.__player = 1
         self.__name_of_player = "JD"
         self.__current_game = True
@@ -19,9 +17,9 @@ class Game:
         self.__game[x][y] = self.__player
 
     def analyze_game(self):
-        vertical = self.vertical()
-        horizontal = self.horizontal()
-        diagonal = self.diagonal()
+        vertical = self.vertical()  # vertical check
+        horizontal = self.horizontal()  # horizontal check
+        diagonal = self.diagonal()  # diagonal check
 
         if vertical == 1 or horizontal == 1 or diagonal == 1:
             print("Player 1 wins")
@@ -33,28 +31,22 @@ class Game:
             return 0
 
     def horizontal(self):
-        # self.__game[0,1:6] = 1
-        for i in range(19):
-            for j in range(15):
-                if self.__game[i][j] == 1 and self.__game[i][j + 1] == 1 and self.__game[i][j + 2] == 1 and \
-                        self.__game[i][j + 3] == 1 and self.__game[i][j + 4] == 1:
-                    return 1
-                elif self.__game[i][j] == 2 and self.__game[i][j + 1] == 2 and self.__game[i][j + 2] == 2 and \
-                        self.__game[i][j + 3] == 2 and self.__game[i][j + 4] == 2:
-                    return 2
-        return 0
+        for i in range(self.__game.shape[0]):  # column
+            for j in range(self.__game.shape[1] - 4):  # row
+                if np.all(self.__game[i, j:j + 5] == 1):
+                    return 1  # player 1 won
+                elif np.all(self.__game[i, j:j + 5] == 2):
+                    return 2  # player 2 won
+        return 0  # no one won
 
     def vertical(self):
-        # self.__game[0:5, 0] = 1
-        for i in range(15):
-            for j in range(19):
-                if self.__game[i][j] == 1 and self.__game[i + 1][j] == 1 and self.__game[i + 2][j] == 1 and \
-                        self.__game[i + 3][j] == 1 and self.__game[i + 4][j] == 1:
-                    return 1
-                elif self.__game[i][j] == 2 and self.__game[i + 1][j] == 2 and self.__game[i + 2][j] == 2 and \
-                        self.__game[i + 3][j] == 2 and self.__game[i + 4][j] == 2:
-                    return 2
-        return 0
+        for i in range(self.__game.shape[1]):  # row
+            for j in range(self.__game.shape[0] - 4):  # column
+                if np.all(self.__game[i, j:j + 5] == 1):
+                    return 1  # player 1 won
+                elif np.all(self.__game[i, j:j + 5] == 2):
+                    return 2  # player 2 won
+        return 0  # no one won
 
     def diagonal(self):
         for i in range(15):
@@ -81,7 +73,7 @@ class Game:
             x = int(input("Enter the position to play x: "))
             y = int(input("Enter the position to play y: "))
 
-            if x < 0 or x >= 19 or y < 0 or y >= 19:
+            if x < 0 or x >= 15 or y < 0 or y >= 15:
                 print("Invalid position! x and y must be between 0 and 18. Try again.")
                 self.play()
         except ValueError:
