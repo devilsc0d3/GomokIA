@@ -17,8 +17,8 @@ class Game:
         self.__game[x][y] = self.__player
 
     def analyze_game(self):
-        vertical = self.vertical()  # vertical check
-        horizontal = self.horizontal()  # horizontal check
+        vertical = self.column()  # vertical check
+        horizontal = self.row()  # horizontal check
         diagonal = self.diagonal()  # diagonal check
 
         if vertical == 1 or horizontal == 1 or diagonal == 1:
@@ -30,7 +30,7 @@ class Game:
         else:
             return 0
 
-    def horizontal(self):
+    def row(self):
         for i in range(self.__game.shape[0]):  # column
             for j in range(self.__game.shape[1] - 4):  # row
                 if np.all(self.__game[i, j:j + 5] == 1):
@@ -39,7 +39,7 @@ class Game:
                     return 2  # player 2 won
         return 0  # no one won
 
-    def vertical(self):
+    def column(self):
         for i in range(self.__game.shape[1]):  # row
             for j in range(self.__game.shape[0] - 4):  # column
                 if np.all(self.__game[i, j:j + 5] == 1):
