@@ -49,16 +49,16 @@ class Game:
         return 0  # no one won
 
     def diagonal(self):
-        for i in range(15):
-            for j in range(15):
+        for i in range(11):
+            for j in range(11):
                 if self.__game[i][j] == 1 and self.__game[i + 1][j + 1] == 1 and self.__game[i + 2][j + 2] == 1 and \
                         self.__game[i + 3][j + 3] == 1 and self.__game[i + 4][j + 4] == 1:
                     return 1
                 elif self.__game[i][j] == 2 and self.__game[i + 1][j + 1] == 2 and self.__game[i + 2][j + 2] == 2 and \
                         self.__game[i + 3][j + 3] == 2 and self.__game[i + 4][j + 4] == 2:
                     return 2
-        for i in range(15):
-            for j in range(4, 19):
+        for i in range(11):
+            for j in range(11):
                 if self.__game[i][j] == 1 and self.__game[i + 1][j - 1] == 1 and self.__game[i + 2][j - 2] == 1 and \
                         self.__game[i + 3][j - 3] == 1 and self.__game[i + 4][j - 4] == 1:
                     return 1
