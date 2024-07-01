@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 import tkinter as tk
 import os
 
+
 class Game:
     def __init__(self):
         self.__game = np.zeros((15, 15), dtype=int)  # init the matrix
@@ -180,6 +181,7 @@ class Game:
     def to_dataframe(self):
         return pd.DataFrame(self.__game)
 
+
 class GameGUI:
     def __init__(self, master, game):
         self.master = master
@@ -216,6 +218,7 @@ class GameGUI:
         x0, y0 = x * 40, y * 40
         x1, y1 = x0 + 40, y0 + 40
         self.canvas.create_oval(x0, y0, x1, y1, fill=color)
+
 
 if __name__ == "__main__":
     root = tk.Tk()
