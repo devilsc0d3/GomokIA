@@ -17,6 +17,11 @@ class Game:
         self.initialize_csv()
 
     def get_next_game_id(self):
+        """
+        Get the next game ID for differentiate each game
+        @param: None
+        @return: int
+        """
         if not os.path.exists(self.__filename):
             return 1
         data = pd.read_csv(self.__filename)
@@ -25,13 +30,30 @@ class Game:
         return data['game_id'].max() + 1
 
     def get_game(self):
+        """
+        Get the game matrix
+        @return: Array
+        """
         return self.__game
 
     def set_game(self, x, y):
+        """
+        Set the game matrix
+        @param x, y: int
+        @return: None
+        """
         self.__game[x][y] = self.__player
         self.export_move_to_csv(x, y)
 
     def analyze_game(self):
+        """
+        Analyze the game to check if a player wins
+        return 1 if player 1 wins,
+        return 2 if ia wins,
+        return 0 if no one wins
+        @param: None
+        @return: int
+        """
         vertical = self.column()  # vertical check
         horizontal = self.row()  # horizontal check
         diagonal = self.diagonal()  # diagonal check
@@ -50,6 +72,14 @@ class Game:
             return 0
 
     def row(self):
+        """
+        Check if a player win with 5 moves in a row
+        return 1 if player 1 win,
+        return 2 if ia win,
+        return 0 if no one win
+        @param: None
+        @return: int
+        """
         for i in range(self.__game.shape[0]):  # column
             for j in range(self.__game.shape[1] - 4):  # row
                 if np.all(self.__game[i, j:j + 5] == 1):
@@ -59,6 +89,14 @@ class Game:
         return 0  # no one won
 
     def column(self):
+        """
+        Check if a player win with 5 moves in a column
+        return 1 if player 1 win,
+        return 2 if ia win,
+        return 0 if no one win
+        @param: None
+        @return: int
+        """
         for i in range(self.__game.shape[1]):  # row
             for j in range(self.__game.shape[0] - 4):  # column
                 if np.all(self.__game[j:j + 5, i] == 1):
@@ -68,6 +106,15 @@ class Game:
         return 0  # no one won
 
     def diagonal(self):
+        """
+        Check if a player win with 5 moves in a row
+        return 1 if player 1 win,
+        return 2 if ia win,
+        return 0 if no one win
+        @param: None
+        @return: int
+        """
+        # Check the entire diagonals increasing
         for i in range(11):
             for j in range(11):
                 if self.__game[i][j] == 1 and self.__game[i + 1][j + 1] == 1 and self.__game[i + 2][j + 2] == 1 and \
@@ -76,6 +123,7 @@ class Game:
                 elif self.__game[i][j] == 2 and self.__game[i + 1][j + 1] == 2 and self.__game[i + 2][j + 2] == 2 and \
                         self.__game[i + 3][j + 3] == 2 and self.__game[i + 4][j + 4] == 2:
                     return 2
+        # Check the others entire diagonals decreasing
         for i in range(11):
             for j in range(4, 15):
                 if self.__game[i][j] == 1 and self.__game[i + 1][j - 1] == 1 and self.__game[i + 2][j - 2] == 1 and \
@@ -87,6 +135,11 @@ class Game:
         return 0
 
     def play(self):
+        """
+        Play the game
+        @param: None,
+        @return: None
+        """
         if not self.__current_game:
             return
 
@@ -123,15 +176,24 @@ class Game:
 
             if len(empty_positions) > 0:
                 if not data.empty:
+                    # Filtrer les coups gagnants du joueur IA (player 2)
                     winning_moves = data[data['player'] == 2]
-                    move_counts = winning_moves.groupby(['x', 'y']).size()
+
+                    # Compter le nombre de fois où chaque position gagnante a été jouée
+                    move_counts = winning_moves.groupby(['x', 'y']).size().reset_index(name='count')
+                    move_counts['probability'] = move_counts['count'] / move_counts['count'].sum()
+
                     if not move_counts.empty:
-                        move_probabilities = move_counts / move_counts.sum()
-                        move_choices = move_probabilities.sample(weights=move_probabilities.values).index.tolist()
-                        x, y = move_choices[0]
+                        # Sélectionner un mouvement basé sur les probabilités calculées
+                        move_probabilities = move_counts['probability'].values
+                        move_choices = move_counts[['x', 'y']].values
+                        chosen_move = move_choices[np.random.choice(len(move_choices), p=move_probabilities)]
+                        x, y = int(chosen_move[0]), int(chosen_move[1])
                     else:
+                        # Si aucun mouvement gagnant n'est trouvé, choisir une position vide au hasard
                         x, y = random.choice(empty_positions)
                 else:
+                    # Si les données sont vides, choisir une position vide au hasard
                     x, y = random.choice(empty_positions)
 
                 self.set_game(x, y)
@@ -148,8 +210,12 @@ class Game:
                 self.analyze_game()
                 self.__player = 1
 
-    # Initialiser le CSV
     def initialize_csv(self):
+        """
+        Initialize the CSV file
+        @param None
+        @return None
+        """
         if not os.path.exists(self.__filename):
             with open(self.__filename, 'w', newline='') as f:
                 writer = csv.writer(f)
@@ -157,16 +223,32 @@ class Game:
 
     # Exporter chaque coup dans le CSV
     def export_move_to_csv(self, x, y):
+        """
+        Export each move to the CSV file
+        :param x: int
+        :param y: int
+        :return:
+        """
         with open(self.__filename, 'a', newline='') as f:
             writer = csv.writer(f)
             writer.writerow([self.__game_id, x, y, self.__player])
 
     def plot_game(self):
+        """
+        Plot the game
+        @param game:
+        @return:
+        """
         plt.imshow(self.__game, cmap='hot', interpolation='nearest')
         plt.colorbar()
         plt.show()
 
     def plot_statistics(self):
+        """
+        Plot the statistics of the game
+        @param None,
+        @return None
+        """
         data = pd.read_csv(self.__filename)
         if data.empty:
             return
@@ -177,9 +259,6 @@ class Game:
         plt.xlabel('Game ID')
         plt.ylabel('Number of Moves')
         plt.show()
-
-    def to_dataframe(self):
-        return pd.DataFrame(self.__game)
 
 
 class GameGUI:
@@ -192,14 +271,24 @@ class GameGUI:
         self.canvas.bind("<Button-1>", self.click_event)
 
     def draw_grid(self):
+        """
+        Draw the grid
+        @param: None,
+        @return: None
+        """
         for i in range(15):
             for j in range(15):
-                x0, y0 = i * 40, j * 40
-                x1, y1 = x0 + 40, y0 + 40
+                x0, y0 = i * 42, j * 42
+                x1, y1 = x0 + 42, y0 + 42
                 self.canvas.create_rectangle(x0, y0, x1, y1, outline="black")
 
     def click_event(self, event):
-        x, y = event.x // 40, event.y // 40
+        """
+        Click event
+        :param event:
+        :return: None
+        """
+        x, y = event.x // 42, event.y // 42
         if self.game.get_game()[x, y] == 0:
             self.game.set_game(x, y)
             self.draw_move(x, y, self.game._Game__player)
@@ -214,9 +303,16 @@ class GameGUI:
                     self.game._Game__player = 1
 
     def draw_move(self, x, y, player):
+        """
+        Draw the move
+        :param x: int
+        :param y: int
+        :param player: int
+        :return: None
+        """
         color = "black" if player == 1 else "white"
-        x0, y0 = x * 40, y * 40
-        x1, y1 = x0 + 40, y0 + 40
+        x0, y0 = x * 42, y * 42
+        x1, y1 = x0 + 42, y0 + 42
         self.canvas.create_oval(x0, y0, x1, y1, fill=color)
 
 
